@@ -59,9 +59,6 @@ Dự án được thực hiện bởi nhóm 5 sinh viên trong khuôn khổ môn
 - Mọi công việc được giao cho từng người phụ trách và có hạn hoàn thành rõ ràng.
 - Thành viên báo cáo sớm khi gặp khó khăn để cả nhóm cùng hỗ trợ.
 
-## Liên hệ
-
-Nếu có góp ý hoặc câu hỏi về dự án, vui lòng liên hệ nhóm qua: ……………………
 
 ## Giấy phép
 
