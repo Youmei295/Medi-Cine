@@ -1,41 +1,41 @@
-# Web Quản Lý Thuốc
+# Medicine Management Web App
 
-Ứng dụng web giúp quản lý thông tin thuốc một cách rõ ràng, nhanh chóng và chính xác, thay thế cho việc ghi chép thủ công.
+A web application that helps manage medicine information clearly, quickly and accurately, replacing manual record keeping.
 
-## Giới thiệu
+## Introduction
 
-Việc theo dõi thuốc (tên thuốc, số lượng tồn, hạn sử dụng, nhà cung cấp…) bằng sổ sách hoặc bảng tính rời rạc dễ gây nhầm lẫn và thất thoát. **Web Quản Lý Thuốc** gom toàn bộ thông tin vào một nơi duy nhất, giúp người dùng tra cứu, cập nhật và theo dõi thuốc mọi lúc, mọi nơi chỉ với trình duyệt.
+Tracking medicines (name, stock quantity, expiry date, supplier, etc.) in notebooks or scattered spreadsheets easily leads to confusion and losses. **Medicine Management Web App** brings all of this information into one place, so users can look up, update and monitor medicines anytime, anywhere, using only a web browser.
 
-Dự án được thực hiện bởi nhóm 5 sinh viên trong khuôn khổ môn học.
+This project is carried out by a team of 5 students as part of a course.
 
-## Mục tiêu
+## Goals
 
-- Quản lý tập trung danh mục thuốc và thông tin liên quan.
-- Hạn chế sai sót, thất thoát so với ghi chép thủ công.
-- Cảnh báo kịp thời các loại thuốc sắp hết hạn hoặc sắp hết hàng.
-- Giao diện đơn giản, dễ dùng cho cả người không rành công nghệ.
+- Centralize the medicine catalog and related information.
+- Reduce errors and losses compared with manual record keeping.
+- Give timely warnings for medicines that are about to expire or run out of stock.
+- Provide a simple, easy-to-use interface, even for people who are not tech-savvy.
 
-## Đối tượng sử dụng
+## Target Users
 
-- Chủ nhà thuốc, quầy thuốc nhỏ.
-- Nhân viên quản lý kho thuốc.
-- Người dùng cá nhân hoặc gia đình muốn theo dõi thuốc đang có ở nhà.
+- Pharmacy owners and small drugstore operators.
+- Staff who manage medicine inventory.
+- Individuals or families who want to keep track of the medicines they have at home.
 
-## Chức năng chính
+## Main Features
 
-> Danh sách dưới đây là định hướng ban đầu, nhóm sẽ cập nhật theo tiến độ thực tế.
+> The list below is the initial plan and will be updated as the project progresses.
 
-- **Quản lý thuốc:** thêm, sửa, xóa, xem chi tiết thông tin thuốc.
-- **Tìm kiếm và lọc:** tra cứu nhanh theo tên, nhóm thuốc, nhà cung cấp, hạn dùng.
-- **Quản lý tồn kho:** theo dõi số lượng nhập, xuất và tồn.
-- **Cảnh báo:** nhắc thuốc sắp hết hạn, sắp hết hàng.
-- **Quản lý nhà cung cấp:** lưu thông tin nơi nhập thuốc.
-- **Tài khoản và phân quyền:** đăng nhập, phân quyền theo vai trò (quản trị, nhân viên).
-- **Báo cáo, thống kê:** tổng hợp tình hình thuốc theo thời gian.
+- **Medicine management:** add, edit, delete and view medicine details.
+- **Search and filter:** quickly look up by name, category, supplier or expiry date.
+- **Inventory management:** track incoming, outgoing and remaining quantities.
+- **Alerts:** remind users of medicines that are close to expiring or running low.
+- **Supplier management:** store information about where medicines are purchased.
+- **Accounts and roles:** log in and assign permissions by role (admin, staff).
+- **Reports and statistics:** summarize the medicine situation over time.
 
-## Thành viên nhóm
+## Team Members
 
-| STT | Họ tên | MSSV | Vai trò |
+| No. | Full name | Student ID | Role |
 | --- | --- | --- | --- |
 | 1 | Vân Hoàng Nhật |  |  |
 | 2 | Trần Tấn Phát |  |  |
@@ -43,23 +43,22 @@ Dự án được thực hiện bởi nhóm 5 sinh viên trong khuôn khổ môn
 | 4 | Nguyễn Hoàng Nam |  |  |
 | 5 | Huỳnh Vĩnh An |  |  |
 
-## Kế hoạch thực hiện
+## Project Plan
 
-| Giai đoạn | Nội dung | Trạng thái |
+| Phase | Description | Status |
 | --- | --- | --- |
-| 1 | Lên ý tưởng, xác định phạm vi dự án | ☐ |
-| 2 | Phân tích yêu cầu, thiết kế | ☐ |
-| 3 | Xây dựng chức năng | ☐ |
-| 4 | Kiểm thử, chỉnh sửa | ☐ |
-| 5 | Hoàn thiện, báo cáo, bảo vệ | ☐ |
+| 1 | Brainstorm ideas and define project scope | ☐ |
+| 2 | Requirements analysis and design | ☐ |
+| 3 | Build features | ☐ |
+| 4 | Testing and fixes | ☐ |
+| 5 | Finalization, report and presentation | ☐ |
 
-## Quy ước làm việc nhóm
+## Team Working Rules
 
-- Họp nhóm định kỳ, mỗi buổi đều có biên bản ghi lại nội dung, quyết định và phân công.
-- Mọi công việc được giao cho từng người phụ trách và có hạn hoàn thành rõ ràng.
-- Thành viên báo cáo sớm khi gặp khó khăn để cả nhóm cùng hỗ trợ.
+- Hold regular team meetings; every meeting has minutes recording discussions, decisions and task assignments.
+- Every task has a responsible person and a clear deadline.
+- Members report difficulties early so the whole team can help.
 
+## License
 
-## Giấy phép
-
-Dự án phục vụ mục đích học tập.
+This project is for educational purposes.
