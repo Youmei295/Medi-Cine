@@ -1,0 +1,112 @@
+# MEDI-CINE - States, recovery, and events
+
+This document describes the proposed state transitions and events. OpenAPI defines HTTP types. The decision log covers rationale, source discrepancies, and open policies. Implementation is pending. The relevant sources are UCS §§2–5 pp13–25, §9 p36, §§12/16/20 pp44–46, 54–55, 65–67, and SAD §4 pp11–39. See [openapi.yaml](openapi.yaml) and [DECISIONS.md](DECISIONS.md).
+
+## State glossary
+
+| Entity / state | Meaning and authoritative storage |
+| --- | --- |
+| Seat config ACTIVE / OUT_OF_SERVICE | Operational configuration of the physical seat. The layout snapshot has a version. Each showtime tracks inventory separately. |
+| Showtime DRAFT / ACTIVE / CANCELLED / COMPLETED | DRAFT and COMPLETED are proposed supporting states. Only ACTIVE accepts holds. Cancellation blocks admission immediately, even while the background worker is still running. |
+| Showtime-seat AVAILABLE / HELD / SOLD | Seat availability is scoped to a showtime. OUT_OF_SERVICE seats have null snapshot state. The inventory enum contains AVAILABLE, HELD, and SOLD. |
+| Hold ACTIVE / RELEASED / EXPIRED / CONSUMED | An ACTIVE hold has a deadline and is associated with its owner and session. The authenticated owner can read it. Successful fulfillment consumes the hold. Creating a PENDING booking leaves the hold active. |
+| Booking PENDING / SUCCESS / FAILED / EXPIRED | SUCCESS requires verified payment and a valid allocation. The quote snapshot is immutable after creation. A PENDING booking has no ticket. |
+| Payment PENDING / SUCCESS / FAILED / EXPIRED | Fulfillment-facing result. Independent providerOutcome UNKNOWN/SUCCESS/FAILED + verificationStatus UNVERIFIED/VERIFIED/CONFLICT; reconciliation NONE/REQUIRED/IN_PROGRESS/RESOLVED. |
+| Ticket issuance NOT_REQUESTED / PENDING / RETRYING / READY | Paid bookings awaiting issuance are PENDING or RETRYING. SAD §4.9 pp31–33 specifies one ticket per seat and uses ACTIVE, USED, and CANCELLED. The public API maps SAD ACTIVE to UNUSED and retains USED and CANCELLED. VALID is an admission preview result. |
+| Booking resolution NONE / REQUIRED / IN_PROGRESS / RESOLVED | Manual resolution of payment or cancellation exceptions. These states confer no authority to issue tickets or reassign seats. |
+
+SAD PENDING_PAYMENT maps to PENDING, CONFIRMED maps to SUCCESS, and ticket ACTIVE maps to UNUSED. The public booking outcome preserves the reason for SAD CANCELLED rather than collapsing it into one state. See ADR-03 and ADR-04. Timestamps use UTC and transitions use the server clock. The client countdown is informational.
+
+## Transition tables
+
+| From -> To | Trigger / actor / guard | Effects / rejection |
+| --- | --- | --- |
+| AVAILABLE -> HELD | `createHold` Customer, authenticated, all selected seats active/config valid/AVAILABLE | The entire selection is atomic, with a unique allocation per showtime and seat. Use the configured deadline, advance the inventory version, and publish the event. Any conflict returns 409 and acquires zero seats. |
+| ACTIVE hold -> ACTIVE | Read or retry with the same key | The TTL stays fixed. A different key represents a new hold request and must not blindly reuse the existing hold. |
+| ACTIVE hold -> RELEASED | `releaseHold`, owner, no booking | Release only allocations still assigned to this hold. Return 204 if already released or expired and 409 if a booking is attached or the hold is consumed. |
+| ACTIVE hold -> EXPIRED; HELD -> AVAILABLE | HoldExpiryJob, now>=deadline, allocation still owned by hold | Use a conditional update guarded by the hold generation. Preserve SOLD seats and any newer hold owned by someone else. Expire PENDING bookings and payments at the same deadline. |
+| no booking -> PENDING | createBooking requires a live owned hold, a current quote, and an active showtime | Keep one booking per hold with an immutable financial snapshot. Seats remain HELD. An uncertain save returns 503. Retry by looking up the booking before initiating payment. |
+| PENDING -> SUCCESS; HELD -> SOLD; ACTIVE hold -> CONSUMED | verified provider success + local confirmation fence, **now<expiresAt**, showtime ACTIVE, every allocation still belongs to the booking | Local serialized authoritative commit; one sale/showtime-seat. Mark payment SUCCESS, issuance PENDING, publish durable intent. No cross-gateway transaction claim. |
+| PENDING -> FAILED; HELD -> AVAILABLE | verified failure/cancel provider, winning before expiration | Payment FAILED, no ticket; release conditional; preserve history reason. A browser cancellation alone does not verify payment failure. |
+| PENDING -> EXPIRED; HELD -> AVAILABLE | backend expiry/payment timeout/cancellation fence | Payment EXPIRED if still PENDING; no valid ticket; released inventory may be sold to others. |
+| Terminal -> same terminal | Exact replay or distinct conflicting IPN | A recorded fingerprint under the same attempt and provider transaction returns 02. Persist distinct conflicting evidence and queue QueryDr before 00. Keep booking, seats, and issued tickets unchanged. |
+| EXPIRED/FAILED booking + verified SUCCESS | late/contradictory provider result | Keep terminal booking/payment fulfillment states; record verified providerOutcome=SUCCESS, reconciliation REQUIRED, booking resolution REQUIRED; no seat resale or issuance. |
+| SUCCESS + issuance PENDING -> READY | TicketIssuanceJob; one ticket per booking+seat, booking SUCCESS, not cancelled | Atomic create unique ticket rows or read existing; issuance READY only after all rows durable; payment never retried as purchase. |
+| issuance PENDING -> RETRYING -> READY | issuer storage/sign/render failure | Keep SUCCESS and SOLD; 202 poll, Retry-After; retry unique issuance, no fake QR, no duplicate tickets. Alert after configured attempts, continue recovery administratively. |
+| UNUSED -> UNUSED | owner view/download, staff lookup/preview | No usage modification. Preview may VALID/USED/INVALID; no reservation for staff. |
+| UNUSED -> USED | `confirmAdmission`, Staff/Admin confirm + current payment/showtime/window/unused guard | Ticket CAS + admission record/audit atomic in local DB; unique admission/ticket. Same actor+attempt replay returns original, new attempt => USED 409. |
+| UNUSED -> CANCELLED | cancelled showtime resolution worker | Immediate showtime fence already blocks admission; no reactivation. USED history remains USED and validation rejects by cancelled showtime. |
+| ACTIVE showtime -> CANCELLED | `cancelShowtime`, Admin with SHOWTIME_CANCEL and an explicit current impact token | Fence immediately and release room slot; cancellationStatus PROCESSING until release/expiry/ticket/notification intents durable; then COMPLETED. Paid financial record stays SUCCESS, SOLD history retained, resolution REQUIRED (Q-03). |
+
+## Showtime update transition matrix
+
+Source UCS §9.2.1 step4b PDF p35, §9.2.2.3/§9.3.3 p36; proposal narrows unsafe edits, preserves the permitted warned cancellation. `ShowtimeUpdate.status` admits ACTIVE only; source state checked authoritatively at commit, not trusted client value.
+
+| Source -> target / command | Mutable field guards | Response / effect |
+| --- | --- | --- |
+| DRAFT -> DRAFT (status omitted) | expectedVersion; movieId,roomId,startsAt,pricingCategory valid; no HELD/SOLD; future schedule/reference/format/cleaning/price checks | 200 safe edit, version increment only effective change; no sold/history rewrite. |
+| DRAFT -> ACTIVE | Same checks + initialize exact new layout/inventory; no reservations | 200 activation; publish new version and public availability only after valid snapshot. |
+| ACTIVE -> ACTIVE | Effective movieId/roomId/startsAt/pricingCategory change only if zero HELD/SOLD; validate overlap/refs/future/format/pricing/layout and expectedVersion | 200 safe unreserved edit; any HELD/SOLD =>409 SHOWTIME_HAS_RESERVATIONS. Same-values/status ACTIVE no-op returns current version. |
+| ACTIVE -> DRAFT; DRAFT target in PATCH | Unsupported transition; schema status forbids DRAFT | 422 VALIDATION_ERROR, no hidden deactivation/cancel bypass. |
+| CANCELLED/COMPLETED -> any PATCH including ACTIVE | Terminal immutable scheduling history | 409 SHOWTIME_TERMINAL; cannot reopen inventory/admit/reprice by PATCH. |
+| DRAFT/ACTIVE -> CANCELLED | Dedicated cancelShowtime only, current impact token + explicit warning confirmation | 202 cancellation fence, resolution lifecycle Q-03; retained HELD/SOLD handled as documented. |
+| ACTIVE -> COMPLETED | Internal scheduling finalizer after screening ended; not a client PATCH | PROPOSED internal lifecycle, preserves financial/admission/history, disallows later scheduling edits. |
+
+Serialization shares showtime/version fence with hold acquisition, payment fulfillment, admission and cancellation; room schedule fence prevents overlap during room/movie-time edits. If reservation commits first, conflicting edit409; if edit commits first, later hold/quote uses current movie/room/price/layout, explicit Customer quote review remains required before booking. No mutation migrates booked seats between movies/categories. Fields outside schema rejected422.
+
+Public geometry immutable per layoutVersion: grid gaps are absent positions, not inventible seats; out-of-service included with null inventory; no owner IDs. Structural changes trigger WSS LAYOUT_CHANGED and full snapshot resync. A stale event cannot relocate seats by label. SC-X-GEOMETRY and SC-X-SHOWTIME-GUARDS demonstrate these contracts.
+
+## Payment boundaries and concurrent outcomes
+
+1. `initiatePayment` persists one logical payment and stable providerReference before outbound create. Database intent/outbound retry must reuse reference/provider idempotency if supported. Provider network timeout => sessionStatus CREATING/UNAVAILABLE, status PENDING, outcome UNKNOWN, 202. `getPayment` shows this; do not create another charge because HTTP key changed. Only 503 before known durable payment creation; uncertain creation is 202 with payment ID. Return/checkout URLs configured/allowlisted server-side. GET/POST customer return to frontend route `/payment-return` is **client navigation**, not backend payment confirmation endpoint. Ignore status/query authority; poll `getBooking`/`getPayment` online.
+2. VNPAY sends a signed GET IPN. Validate the full canonical signature input, merchant, reference, and exact integer VND × 100 amount before deduplication. Success requires both signed response code and transaction status 00. Browser return is display only.
+3. Verify signature, merchant, reference, and amount before deduplication. Identify the attempt by vnp_TmnCode and vnp_TxnRef and associate vnp_TransactionNo with the evidence. Hash the UTF-8 VNPAY 2.1.0 canonical signed parameter string, excluding signature fields, with SHA-256. An already accepted fingerprint for that transaction is an exact replay. A new fingerprint is new evidence even if the booking is terminal. If it conflicts with a recorded result or provider transaction number, durably store it and queue signed QueryDr before acknowledging with 00. Set verificationStatus=CONFLICT and keep reconciliation pending without changing booking, seat, or ticket state. Return 99 if durable acceptance fails. A browser return cannot confirm payment. VNPAY acknowledgment: 00 for newly accepted evidence after durable recording and, for conflicts, durable QueryDr scheduling. 02 only for a fingerprint already recorded under the same transaction identity. 01 unknown reference, 04 amount mismatch, 97 invalid signature, 99 other error or temporary inability to durably accept. Acceptance of conflicting evidence does not confirm payment or regress fulfillment. Use an atomic uniqueness check for transaction identity and fingerprint, and commit the evidence and QueryDr work item together for a conflict. Follow the original hold expiry while payment is unverified. IPN does not supply an eventId. Any internal evidence or domain event ID is assigned by MEDI-CINE.
+4. Authoritative local fulfillment coordinator serializes confirmation/expiry/cancellation per booking/allocation. At commit, `now >= expiresAt` loses even if gateway occurredAt was earlier: verified receipt arrived too late for fulfillment; do not backdate ownership. Race winner success before deadline commits SUCCESS+SOLD; expiry CAS sees consumed booking and does nothing. Winner expiry releases seats, terminal EXPIRED; success later records money exception, never reacquires seats. Third buyer unaffected.
+5. Cache TTL must not be sole authoritative sale guard. Proposal: durable allocation/version/expiry fence and DB unique sale(showtime,seat), with cache as projection/acceleration. DB outage/unverifiable allocation fails closed with 503; do not sell from cache-only belief. If cache lost, invalidate unrecoverable holds and expire corresponding pending bookings; query provider for any money already attempted; never lose/release SOLD. Recovery coordinator reconciles stale cache with durable fence. This is a design resolution of SAD §4.13 p37 cache-loss description, not an implemented data model.
+6. Local commit persists intent for issuance/seat events/notification. Cache update, gateway and message delivery happen afterwards and can fail separately. Durable inbox worker reprocesses accepted receipts after crash; local confirmation is idempotent. Recovery scans SUCCESS bookings lacking ticket intent/rows, retries issuance; projection replay/resync fixes stale live map. Cache failure does not undo money/sale. Do not expose an actionable PENDING booking with AVAILABLE allocatable seats: expire/fence inconsistent hold before new sale. Report observed SUCCESS/SOLD from authoritative records while ticketIssuanceStatus can be PENDING/RETRYING.
+7. Reconciliation queries signed VNPAY QueryDr responses and verifies the stored merchant reference and amount. Conflicts remain pending verification. Once seats have been released, an expired booking stays closed even if a collection is later verified. Record the money separately and queue a full refund for a verified payment that cannot yield tickets or for paid tickets to a cinema-cancelled showtime. A separately authorized REFUND_APPROVE actor must approve the refund. Persist a stable refund intent for the original transaction before calling VNPAY. A timeout remains pending while the provider outcome is reconciled. Do not issue a second refund while the first is unresolved. Record REFUNDED only when verified. The cancellation permission confers no refund approval.
+
+## Admission concurrency
+
+Scanner camera decoding is client-only. lookupTicket and previewAdmission do not admit. Confirm rechecks ticket, payment, showtime, and the window at commit by server time. For a showtime at startsAt, admit from startsAt minus 30 minutes inclusive to startsAt plus 15 minutes exclusive, with zero tolerance and no Staff override. Cancelled showtimes are always rejected. Atomically move UNUSED to USED once. Preserve the original 200 replay for the same successful attempt, and return 409 TICKET_ALREADY_USED for a different attempt on the used ticket. Offline clients cannot admit.
+
+## WSS seat-state protocol (PROPOSED, outside OpenAPI)
+
+Source SAD R2/R12 PDF pp16-17, §4.3 pp21-22, §4.7 pp27-29; UCS §2.3.4 p14. URL `wss://api.example.invalid/api/v1/realtime/seats`, subprotocol `medi-cine.seats.v1`. Public read-only showtime stream; no bearer/owner data necessary. TLS, Origin allowlist and per-connection/rate limits; no write/hold/book commands. One subscribed showtime per connection PROPOSED, heartbeat every 20s/close after 60s idle PROPOSED configurable. Max frame 64KiB PROPOSED; large inventory changes chunk into contiguous versioned events.
+
+Client commands:
+
+```json
+{"type":"subscribe","requestId":"req_demo_01","showtimeId":"shw_demo_01","streamEpoch":"epoch_demo_01","afterVersion":42}
+```
+
+`requestId`/showtimeId opaque IDs, epoch nullable and afterVersion integer>=0. `subscribe` replaces old subscription; `unsubscribe` body `{type,requestId,showtimeId}` stops it and returns `{type:"unsubscribed",requestId,showtimeId}`. `ping` `{type:"ping",requestId}` -> `pong` with requestId/serverTime. Server malformed command -> `error` code INVALID_MESSAGE; unknown/closed showtime -> SHOWTIME_UNAVAILABLE; rate => RATE_LIMITED and retryAfterSeconds; never owner/Customer metadata. Unknown command rejected.
+
+Server confirms `{type:"subscribed",requestId,showtimeId,streamEpoch,throughVersion,serverTime}` and replays events **after** snapshot version, including events that happened between REST snapshot and subscription. Client buffers until subscribed, applies in order. Server registers subscription/replay boundary atomically relative to append log; no gap between replay and live tail. Replay retention configurable (example 10min), not delivery guarantee. Epoch differs/afterVersion too old/gap => `{type:"resync_required",showtimeId,streamEpoch,reason:"CURSOR_EXPIRED"}` (other reasons EPOCH_CHANGED/VERSION_GAP); client closes/reloads `getSeatMap` then subscribes from that snapshot epoch+version. If even this cursor expires repeatedly, reconnect subscription with no cursor to receive resync signal; REST refresh remains fallback, never claim events alone authorize sale.
+
+```json
+{"type":"seat_state_changed","eventId":"evt_demo_01","showtimeId":"shw_demo_01","streamEpoch":"epoch_demo_01","version":43,"occurredAt":"2026-11-20T10:00:01Z","changes":[{"seatId":"seat_a01","state":"HELD"},{"seatId":"seat_a02","state":"HELD"}]}
+```
+
+Fields required as shown. `state` is AVAILABLE/HELD/SOLD; structural/out-of-service/layout version change sends `resync_required` reason LAYOUT_CHANGED, not a fake seat state. `eventId` opaque unique; `version` monotonically increasing contiguous **per showtime+epoch**; one event may contain many seat changes from one committed operation. No global ordering. Deduplicate eventId/version; <=lastVersion ignored; >last+1 => stop speculative apply and resync. Stream reconnect uses bounded exponential backoff/jitter (1..30s proposal), retained epoch/version, never reset SOLD from an older packet. Domain events/log projection may be delayed; only authoritative hold response can confirm acquisition. Cache failure emits resync_required once projection recovered. Cancelled showtime emits `{type:"showtime_closed",showtimeId,streamEpoch,version,reason:"CANCELLED",occurredAt}`; stop selection and fetch latest owner booking. No hold owner/customerId/other hold expiry leaks.
+
+## Domain events and background processing
+
+These proposed events are internal and backed by durable processing records. The envelope contains an opaque eventId, eventType, aggregateId, an integer aggregateVersion of at least 1, a UTC occurredAt, correlationId, and a minimal payload. Consumers deduplicate by eventId and business effect. Retries provide at-least-once delivery. Private payloads stay on the backend and WSS messages expose sanitized fields.
+
+| Internal ID / event | Producer / guard | Consumer / effects / failure |
+| --- | --- | --- |
+| JOB-HOLD-EXPIRY | Deadline scan + request-time fence | Expire still-PENDING/active allocations; conditional release; publish EVT-SEAT. A delayed timer never extends the deadline. |
+| JOB-PAYMENT-RECONCILE | Unknown/late/conflicting provider result | Verify provider online, preserve money exception; retries/alert; no auto-sell/refund. |
+| EVT-PAYMENT-CONFIRMED | committed SUCCESS; payload paymentId,bookingId | JOB-TICKET-ISSUE + JOB-NOTIFICATION; duplicate safe. |
+| EVT-PAYMENT-FAILED | verified failure/expiry; payload IDs/reason | Notification update; never paid ticket. |
+| JOB-TICKET-ISSUE / EVT-TICKETS-ISSUED | SUCCESS + active showtime, unique booking-seat | PENDING/RETRYING -> READY; event payload bookingId,ticketIds, no QR in general broadcast. |
+| EVT-SEAT | committed allocation/sale/release, payload showtimeId+sanitized changes | WSS ordering/log; projection failure => resync, no rollback booking. |
+| JOB-SHOWTIME-CANCEL | confirmation by an Admin with SHOWTIME_CANCEL | Expire pending/fence money, cancel UNUSED tickets, retain financial history, queue authorized full-refund review and notifications under Q-03; retry until completion. |
+| JOB-NOTIFICATION / EVT-NOTIFICATION-CREATED | committed core event; unique recipient+event+type | Persist in-app record then external email/push queue independently. Failure queued/retrying/failed; core transaction stays committed. |
+| JOB-REMINDER | scheduled lead-time config (SAD §4.10 p33) | Only SUCCESS + valid issued UNUSED ticket + active upcoming showtime; cancelled/expired/USED suppress or replace with status. Idempotent reminder key customer/showtime/type/schedule generation. |
+| JOB-PUSH-DISPATCH | optional enabled + active owner device + eligible record | Queue->SUBMITTED to service only, not guaranteed DISPLAYED/DELIVERED. 404/410 stale endpoint deactivate; timeout/5xx retry bounded; denied/revoked browser permission no send, keep in-app. |
+
+Notification read state is independent unread (`readAt=null`) -> read (timestamp) only `markNotificationRead`; GET list/detail stays read-only. UI detail opens: GET current detail, then explicit PUT read after success; failed GET no automatic PUT. Push display/dismiss/service-worker `notificationclick` is client event, not backend mark-read. On open: online login/session+owner check, GET latest linked booking/ticket/showtime then optional explicit mark-read if opening Notifications detail. Notification/push failure never rolls back booking/payment/ticket or exposes stale QR as current. Browser permission prompt, PWA install, caching and service-worker events have no pretend REST endpoints. Device permission denied => no subscription POST; revoked => browser unsubscribe+backend DELETE when online; server stale endpoint cleanup handles absent client. Cached summaries labelled offline; no offline payment or authoritative check-in.
+
+Report integer VND amounts per showtime cohort at asOf. collectedAmount sums verified collections once per payment, including late collections. refundedAmount sums only provider-confirmed full refunds. pendingAmount sums unresolved collection attempts, including conflicts without a verified collection. pendingRefundAmount tracks verified collections awaiting refund approval or a confirmed refund result. It overlaps collectedAmount until resolution and must not be added to it. Keep revenue as historical booked sales for compatible analytics.
