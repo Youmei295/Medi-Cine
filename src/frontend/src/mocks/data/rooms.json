@@ -1,0 +1,45 @@
+{
+  "_comment": "Compact room layouts. The mock API expands them into SeatView[] (openapi SeatMap). One string per row, row 1 = nearest the screen. R = REGULAR, V = VIP, SS = one SWEETBOX (couple) seat that spans two columns, numbered at its left column, X = REGULAR seat OUT_OF_SERVICE, '.' = aisle/gap. Labels = row letter + running seat count in that row.",
+  "rooms": [
+    {
+      "id": "room-01",
+      "name": "Phòng 1",
+      "format": "2D",
+      "layout": [
+        "RRR.RRRRRRRR.RRR",
+        "RRR.RRRRRRRR.RRR",
+        "RRR.RRRRRRRR.RRR",
+        "RRR.VVVVVVVV.RRR",
+        "RRR.VVVVVVVV.RRR",
+        "RRR.VVVVXVVV.RRR",
+        "RRR.VVVVVVVV.RRR",
+        ".SS.SS.SS.SS.SS."
+      ]
+    },
+    {
+      "id": "room-02",
+      "name": "Phòng IMAX",
+      "format": "IMAX",
+      "layout": [
+        "RRRRR..RRRRR",
+        "RRRRR..RRRRR",
+        "RRRRR..RRRRR",
+        "VVVVV..VVVVV",
+        "VVVVV..VVVVV",
+        "SS.SS..SS.SS"
+      ]
+    },
+    {
+      "id": "room-03",
+      "name": "Phòng 3",
+      "format": "3D",
+      "layout": [
+        "RRRR.RRRR",
+        "RRRR.RRRR",
+        "VVVV.VVVV",
+        "VVVV.VVVV",
+        "SS.....SS"
+      ]
+    }
+  ]
+}

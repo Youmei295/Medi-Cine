@@ -1,0 +1,25 @@
+{
+  "_comment": "Times are UTC (Z). Local Vietnam time = UTC+7, e.g. 12:30Z = 19:30. 21-22/11/2026 are Sat/Sun (WEEKEND); before 12:00 local = EARLY. endsAt / occupiedUntil are computed by the mock API from the movie duration + cleaningMinutes; no two showtimes overlap in the same room. mv-008 has no showtimes on purpose (UC01 alt 1.2.2.2). st-006 is sold out (UC02 alt 2.2.2.3). st-014 is cancelled (hidden).",
+  "showtimes": [
+    { "id": "st-001", "movieId": "mv-001", "roomId": "room-01", "startsAt": "2026-11-20T07:30:00Z", "format": "2D", "pricingCategory": "WEEKDAY", "status": "ACTIVE" },
+    { "id": "st-002", "movieId": "mv-001", "roomId": "room-01", "startsAt": "2026-11-20T12:30:00Z", "format": "2D", "pricingCategory": "WEEKDAY", "status": "ACTIVE" },
+    { "id": "st-003", "movieId": "mv-001", "roomId": "room-01", "startsAt": "2026-11-21T03:00:00Z", "format": "2D", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-004", "movieId": "mv-001", "roomId": "room-01", "startsAt": "2026-11-21T13:00:00Z", "format": "2D", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-005", "movieId": "mv-001", "roomId": "room-01", "startsAt": "2026-11-22T12:00:00Z", "format": "2D", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-006", "movieId": "mv-002", "roomId": "room-02", "startsAt": "2026-11-20T14:45:00Z", "format": "IMAX", "pricingCategory": "WEEKDAY", "status": "ACTIVE" },
+    { "id": "st-007", "movieId": "mv-002", "roomId": "room-02", "startsAt": "2026-11-21T11:00:00Z", "format": "IMAX", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-008", "movieId": "mv-002", "roomId": "room-01", "startsAt": "2026-11-22T08:00:00Z", "format": "2D", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-009", "movieId": "mv-003", "roomId": "room-01", "startsAt": "2026-11-20T03:30:00Z", "format": "2D", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-010", "movieId": "mv-003", "roomId": "room-01", "startsAt": "2026-11-23T12:30:00Z", "format": "2D", "pricingCategory": "WEEKDAY", "status": "ACTIVE" },
+    { "id": "st-011", "movieId": "mv-004", "roomId": "room-03", "startsAt": "2026-11-21T02:30:00Z", "format": "3D", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-012", "movieId": "mv-004", "roomId": "room-03", "startsAt": "2026-11-21T07:00:00Z", "format": "3D", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-013", "movieId": "mv-004", "roomId": "room-01", "startsAt": "2026-11-22T03:00:00Z", "format": "2D", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-014", "movieId": "mv-004", "roomId": "room-03", "startsAt": "2026-11-22T07:00:00Z", "format": "3D", "pricingCategory": "WEEKEND", "status": "CANCELLED" },
+    { "id": "st-015", "movieId": "mv-005", "roomId": "room-01", "startsAt": "2026-11-20T10:00:00Z", "format": "2D", "pricingCategory": "WEEKDAY", "status": "ACTIVE" },
+    { "id": "st-016", "movieId": "mv-005", "roomId": "room-01", "startsAt": "2026-11-23T03:00:00Z", "format": "2D", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-017", "movieId": "mv-006", "roomId": "room-02", "startsAt": "2026-11-20T04:00:00Z", "format": "IMAX", "pricingCategory": "EARLY", "status": "ACTIVE" },
+    { "id": "st-018", "movieId": "mv-006", "roomId": "room-02", "startsAt": "2026-11-22T12:30:00Z", "format": "IMAX", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-019", "movieId": "mv-007", "roomId": "room-01", "startsAt": "2026-11-21T07:30:00Z", "format": "2D", "pricingCategory": "WEEKEND", "status": "ACTIVE" },
+    { "id": "st-020", "movieId": "mv-007", "roomId": "room-01", "startsAt": "2026-11-23T07:00:00Z", "format": "2D", "pricingCategory": "WEEKDAY", "status": "ACTIVE" }
+  ]
+}

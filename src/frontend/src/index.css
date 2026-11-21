@@ -1,0 +1,229 @@
+@import 'tailwindcss';
+
+/* Design tokens from docs/analysis and design/UI_Design_Brief.md v0.2 (§3).
+   Every screen, Home included (D20), uses only these values.
+   Tailwind v4 turns each token into utilities, e.g. bg-house, text-screen,
+   border-seat-line, font-display, text-step-2, rounded-seat. */
+@theme {
+  /* Colour — direction A "Phòng chiếu", teal-and-orange grade */
+  --color-house: #0b1a1c; /* page background */
+  --color-wall: #13282b; /* raised surfaces */
+  --color-aisle: #24403f; /* decorative dividers, SOLD seat fill (never a control boundary) */
+  --color-seat-line: #5e807f; /* AVAILABLE seat outline, input/button borders (>= 3:1) */
+  --color-screen: #e4eeec; /* primary text, screen arc */
+  --color-dust: #9db5b2; /* secondary text */
+  --color-lamp: #f4b23e; /* primary action, selected seat, focus, time */
+  --color-velvet: #e07280; /* errors, conflicts, expiring hold */
+
+  /* Type — Anybody (display, set wide) + Commissioner (text/UI) */
+  --font-display: 'Anybody', 'Commissioner', system-ui, sans-serif;
+  --font-sans: 'Commissioner', system-ui, sans-serif;
+
+  /* Scale 1.25, base 16 px: 13 · 16 · 20 · 25 · 31 · 39 · 49 · 61 */
+  --text-caption: 0.8125rem;
+  --text-step-0: 1rem;
+  --text-step-1: 1.25rem;
+  --text-step-2: 1.5625rem;
+  --text-step-3: 1.9375rem;
+  --text-step-4: 2.4375rem;
+  --text-step-5: 3.0625rem;
+  --text-step-6: 3.8125rem;
+
+  /* Radius by role */
+  --radius-poster: 4px;
+  --radius-seat: 6px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
+
+  /* Layout */
+  --container-content: 75rem; /* 1200 px */
+
+  /* Motion (brief §8; details settled in Phase 6). Entrance = Home hero only. */
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  /* On-the-spot motion that goes out and back (the 60 s timer beat). */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --animate-enter-rise: enter-rise 700ms var(--ease-enter) both;
+  --animate-enter-fade: enter-fade 520ms var(--ease-enter) both;
+  --animate-enter-settle: enter-settle 1100ms var(--ease-enter) both;
+
+  @keyframes enter-rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+  @keyframes enter-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @keyframes enter-settle {
+    from {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Phase 6 micro-interactions (brief §8: 150–250 ms, transform + opacity only).
+     Each plays once when its element mounts or its class is applied. */
+  --animate-seat-mark: seat-mark 150ms var(--ease-enter) both; /* ✓ appears on a chosen seat */
+  --animate-seat-taken: seat-taken 240ms var(--ease-enter) both; /* seat taken by someone else (2.2.2.2) */
+  --animate-notice-in: notice-in 200ms var(--ease-enter) 60ms both; /* notice follows the seats */
+  --animate-value-settle: value-settle 160ms var(--ease-enter) both; /* a total that just changed */
+  --animate-panel-in: panel-in 200ms var(--ease-enter) both; /* hold timer + actions appear */
+  --animate-timer-beat: timer-beat 240ms var(--ease-in-out); /* one beat at 60 s left */
+  --animate-list-in: list-in 200ms var(--ease-enter) both; /* one day's showtimes swap in */
+  /* Home movie switch (Phase 7, approved exception to brief §8's list): a short
+     cousin of the page-load entrance, never the 0.7–1.1 s original. */
+  --animate-backdrop-in: backdrop-in 250ms var(--ease-enter) both; /* new still crossfades over the old */
+  --animate-hero-swap: hero-swap 200ms var(--ease-enter) both; /* the movie's text fades up */
+
+  @keyframes seat-mark {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+  @keyframes seat-taken {
+    from {
+      opacity: 0.5;
+      transform: scale(1.12);
+    }
+  }
+  @keyframes notice-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes value-settle {
+    from {
+      opacity: 0.4;
+      transform: translateY(3px);
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+  @keyframes timer-beat {
+    50% {
+      transform: scale(1.03);
+    }
+  }
+  @keyframes backdrop-in {
+    from {
+      opacity: 0;
+      transform: scale(1.02);
+    }
+  }
+  @keyframes hero-swap {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @keyframes list-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-house);
+    color: var(--color-screen);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Prices, times, countdown and seat labels line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Display type is set wide, like a widescreen frame (brief §3.2). */
+  .display-wide {
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' 125;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lamp);
+    outline-offset: 2px;
+  }
+
+  /* Browser surfaces take the palette too (Phase 5): selection, caret,
+     native checkboxes/radios, scrollbars. */
+  ::selection {
+    background-color: var(--color-lamp);
+    color: var(--color-house);
+  }
+  html {
+    caret-color: var(--color-lamp);
+    accent-color: var(--color-lamp);
+    scrollbar-color: var(--color-seat-line) var(--color-house);
+  }
+}
+
+/* Reduced motion (Phase 5, replaces a global 0.01 ms kill): the Home entrance
+   keeps a short fade so the change still reads, but nothing moves or scales;
+   transform transitions (press, poster lift) snap. Colour fades stay.
+   Unlayered on purpose, so it wins over the animate-* utilities; inline
+   animation delays still apply. Phase 6 micro-interactions follow the same
+   rule: same timing, opacity only; the 60 s timer beat is dropped (its colour
+   change stays). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter-rise,
+  .animate-enter-fade,
+  .animate-enter-settle,
+  .animate-panel-in,
+  .animate-list-in,
+  .animate-hero-swap {
+    animation: enter-opacity 200ms var(--ease-enter) both;
+  }
+  .animate-backdrop-in {
+    animation: enter-opacity 250ms var(--ease-enter) both;
+  }
+  .animate-seat-mark {
+    animation: enter-opacity 150ms var(--ease-enter) both;
+  }
+  .animate-seat-taken {
+    animation: enter-opacity 240ms var(--ease-enter) both;
+  }
+  .animate-notice-in {
+    animation: enter-opacity 200ms var(--ease-enter) 60ms both;
+  }
+  .animate-value-settle {
+    animation: value-fade 160ms var(--ease-enter) both;
+  }
+  .animate-timer-beat {
+    animation: none;
+  }
+  .transition-transform,
+  .transition {
+    transition-property: color, background-color, border-color, opacity;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@keyframes enter-opacity {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes value-fade {
+  from {
+    opacity: 0.4;
+  }
+}
