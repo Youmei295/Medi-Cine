@@ -10,8 +10,8 @@ This decision log documents the proposed API. UC17 and UC20 are optional. Page r
 | SAD — `pa/pa3/Software_Architecture_Document_v1.1.pdf` | 40 pages. The filename says v1.1, the cover and header say v1.0, and the p2 revision history lists 1.0.x dated 07/Nov/26. The header is dated 09/Nov/26. | §4, pp11–39 describes modules, session tokens, the adapter, WSS, and cardinality. §1.4, p6 cites UCS v1.0. Page 40 contains deployment and implementation headings only. |
 | Vision — `pa/pa2/Vision_Document_v1.2.pdf` | 9 pages. Cover, header, and p2 revision history show v1.2, 22/Oct/26. | §§3.2–3.4, pp4–6 define roles. §4, pp7–8 covers product perspective and providers. §5, pp8–9 lists F01–F16, including 14 core capabilities. §6, p9 gives nonfunctional requirements. |
 | SDP — `pa/pa2/Software_Development_Plan_v2.0.pdf` | 25 pages. Cover, header, and p2 revision history show v2.0, 23/Oct/26. | §§1.2 and 2, pp4–8 cover scope, the sandbox, and deliverables. §4.2, pp12–19 gives priorities and the API milestone. §§4.3–4.4, pp20–25 cover review and acceptance. This is planning evidence. |
-| `src/blah.gitkeep` | Current repository evidence | The backend source directory contains a placeholder. The API documents 66 target operations. |
-| Root `README.md` | Current repository evidence | Describes medicine management. The four PDFs establish the cinema requirements for this API. |
+| `backend/Cargo.toml` and `backend/src/main.rs` | Current repository evidence | Axum server with a SQLx PostgreSQL pool and two operational probes. The 66 target operations are pending. |
+| Root `README.md` | Current repository evidence | Describes the cinema project, backend status, and repository layout. The four PDFs establish the cinema requirements for this API. |
 | `docs/requirements/Vision_Document.docx` | Revision unverified | Supplementary file outside the baseline. |
 | UCS v1.0 and `pa/pa1/` | Historical documents | The current UCS supersedes these for contract purposes. A separate PA2 evaluation document was not in the source inventory. |
 
@@ -32,7 +32,7 @@ The source review used pypdf and PyMuPDF to extract pages and checked rendered U
 | ADR-09 | UCS §9.2.2.3 p36 blocks room or time changes with HELD or SOLD seats and permits cancellation after warning and confirmation. | Read impact counts and issue a token bound to the latest counts and version. Require explicit confirmation. Apply the cancellation guard immediately, then release, notify, and reconcile asynchronously. Queue eligible payments for authorized full refund under Q-03. | Pending and paid bookings affected by cancellation. |
 | ADR-10 | SAD §4.4 p23 describes creating and deactivating Staff/Admin. UCS §6.4.2 p27 refers to preconfigured accounts. SAD §4.8 p29 supports administrative payment lookup. | Provision privileged accounts through deployment configuration. Administrative payment lookup remains read-only. | Supporting administration. |
 | ADR-11 | SAD §4.7 p27 makes hold TTL configurable. UCS §9.3.1 p36 calls for a cleaning interval, and §12.2.2.5 p45 refers to the current admission window. | Configure hold TTL, cleaning interval, and admission window. Default to 600 seconds and 15 minutes. Apply the approved fixed admission window. | Q-02 and Q-06. |
-| ADR-12 | The checkout has no established backend conventions or dependencies. | Use REST JSON at `/api/v1` with OpenAPI 3.1.0 and JSON Schema 2020-12. API_GUIDE.md defines money, ID, time, and filter conventions. STATE_AND_EVENTS.md describes WSS separately. | All documented operations. |
+| ADR-12 | The repository had no backend crate when the contract was drafted. | Use REST JSON at `/api/v1` with OpenAPI 3.1.0 and JSON Schema 2020-12. API_GUIDE.md defines money, ID, time, and filter conventions. STATE_AND_EVENTS.md describes WSS separately. | All documented operations. |
 
 ## Additional design decisions and examples
 
@@ -59,4 +59,4 @@ Payment references: [Payment and IPN](https://sandbox.vnpayment.vn/apis/docs/tha
 
 ## Implementation evidence and acceptance checks
 
-The source directory contains a placeholder. The documentation covers the proposed API. Runtime, concurrency, latency, and authorization integration checks are NOT RUN. NFR-01 through NFR-10 in TRACEABILITY.md give the source targets, measurement environment, and evidence to collect. These include a representative cinema dataset, synchronized booking attempts, verified callback and restart faults, concurrent admission of the same ticket, role and ownership checks, and latency distributions recorded with the environment.
+The Rust backend provides liveness and PostgreSQL readiness probes. The documentation covers the proposed cinema API. Its runtime HTTP, concurrency, latency, and authorization acceptance checks are NOT RUN. NFR-01 through NFR-10 in TRACEABILITY.md give the source targets, measurement environment, and evidence to collect. These include a representative cinema dataset, synchronized booking attempts, verified callback and restart faults, concurrent admission of the same ticket, role and ownership checks, and latency distributions recorded with the environment.

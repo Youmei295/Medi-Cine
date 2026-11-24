@@ -1,37 +1,23 @@
-# Medicine Management Web App
+# Medi-Cine
 
-A web application that helps manage medicine information clearly, quickly and accurately, replacing manual record keeping.
+Medi-Cine is a student project for cinema ticket booking and operations. The target workflows cover browsing movies and showtimes, reserving seats, paying through VNPAY Sandbox, retrieving e-tickets, and checking guests in at the cinema.
 
-## Introduction
+## Backend Status
 
-Tracking medicines (name, stock quantity, expiry date, supplier, etc.) in notebooks or scattered spreadsheets easily leads to confusion and losses. **Medicine Management Web App** brings all of this information into one place, so users can look up, update and monitor medicines anytime, anywhere, using only a web browser.
+The [Rust backend](backend/Cargo.toml) uses Axum, Tokio, and a SQLx connection pool for PostgreSQL. The current server exposes two operational endpoints. The cinema workflows in the API contract are planned.
 
-This project is carried out by a team of 5 students as part of a course.
+| Endpoint | Behavior |
+| --- | --- |
+| `GET /health` | Returns `200` when the HTTP process is running. |
+| `GET /ready` | Returns `200` when PostgreSQL answers `SELECT 1` within two seconds, or `503` otherwise. |
 
-## Goals
+Set `DATABASE_URL` to a PostgreSQL connection URL. `BIND_ADDR` is optional and defaults to `127.0.0.1:3000`.
 
-- Centralize the medicine catalog and related information.
-- Reduce errors and losses compared with manual record keeping.
-- Give timely warnings for medicines that are about to expire or run out of stock.
-- Provide a simple, easy-to-use interface, even for people who are not tech-savvy.
+## Repository Layout
 
-## Target Users
-
-- Pharmacy owners and small drugstore operators.
-- Staff who manage medicine inventory.
-- Individuals or families who want to keep track of the medicines they have at home.
-
-## Main Features
-
-> The list below is the initial plan and will be updated as the project progresses.
-
-- **Medicine management:** add, edit, delete and view medicine details.
-- **Search and filter:** quickly look up by name, category, supplier or expiry date.
-- **Inventory management:** track incoming, outgoing and remaining quantities.
-- **Alerts:** remind users of medicines that are close to expiring or running low.
-- **Supplier management:** store information about where medicines are purchased.
-- **Accounts and roles:** log in and assign permissions by role (admin, staff).
-- **Reports and statistics:** summarize the medicine situation over time.
+- `backend/` contains the Rust crate and Cargo lockfile. [main.rs](backend/src/main.rs) starts the server, [config.rs](backend/src/config.rs) loads settings, [db.rs](backend/src/db.rs) initializes the SQLx pool, and [http/](backend/src/http) defines the router and handlers.
+- `docs/api/` contains the [target API guide](docs/api/README.md), the [OpenAPI 3.1 contract](docs/api/openapi.yaml), and the use-case mappings and acceptance scenarios. The contract validator checks the specification and related documents.
+- `pa/` contains course deliverables, including the cinema requirements and architecture.
 
 ## Team Members
 
@@ -42,16 +28,6 @@ This project is carried out by a team of 5 students as part of a course.
 | 3 | Lê Hoàng Nam |  |  |
 | 4 | Nguyễn Hoàng Nam |  |  |
 | 5 | Huỳnh Vĩnh An |  |  |
-
-## Project Plan
-
-| Phase | Description | Status |
-| --- | --- | --- |
-| 1 | Brainstorm ideas and define project scope | ☐ |
-| 2 | Requirements analysis and design | ☐ |
-| 3 | Build features | ☐ |
-| 4 | Testing and fixes | ☐ |
-| 5 | Finalization, report and presentation | ☐ |
 
 ## Team Working Rules
 

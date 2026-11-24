@@ -323,7 +323,7 @@ Each scenario below resets fixtures/state unless explicitly a retry/race continu
 
 ## Planned NFR acceptance execution
 
-NFR-01..NFR-10 in TRACEABILITY.md are the source-linked acceptance scenarios for future implementation/UI environments. Use their operations, dataset/environment and pass conditions as execution checklist; record measured timing, role matrix results, browser screenshots, sanitized logs and setup/demo evidence when a build exists. All are **NOT RUN**, independent of schema/static checks. Contract validation does not count as a passing backend NFR scenario. These checks add no HTTP endpoints or invented approved numeric UI/accessibility threshold.
+NFR-01 through NFR-10 in TRACEABILITY.md define source-linked acceptance scenarios. All remain **NOT RUN**. Once the relevant workflows are implemented, use the listed operations, dataset, environment, and pass conditions as the execution checklist. Record measured timings, role matrix results, browser screenshots, sanitized logs, and setup or demo evidence. Track API contract validation and runtime NFR results independently.
 
 
 ## Approved policy regression scenarios
