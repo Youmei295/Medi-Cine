@@ -1,64 +1,50 @@
-# Medicine Management Web App
+# MEDI-CINE
 
-A web application that helps manage medicine information clearly, quickly and accurately, replacing manual record keeping.
+Hệ thống quản lý rạp chiếu phim và đặt vé trực tuyến (Group 04). Schema database v6: 21 bảng, PostgreSQL 16.
 
-## Introduction
+Tài liệu ERD: [`docs/database/`](docs/database/). Ghi chú cho backend: [`docs/database/db-notes.md`](docs/database/db-notes.md).
 
-Tracking medicines (name, stock quantity, expiry date, supplier, etc.) in notebooks or scattered spreadsheets easily leads to confusion and losses. **Medicine Management Web App** brings all of this information into one place, so users can look up, update and monitor medicines anytime, anywhere, using only a web browser.
+## Database (PostgreSQL 16)
 
-This project is carried out by a team of 5 students as part of a course.
+### Yêu cầu
 
-## Goals
+- Docker + Docker Compose
+- `make` (MSYS2/Git Bash trên Windows)
+- File `.env` (sao chép từ `.env.example`)
 
-- Centralize the medicine catalog and related information.
-- Reduce errors and losses compared with manual record keeping.
-- Give timely warnings for medicines that are about to expire or run out of stock.
-- Provide a simple, easy-to-use interface, even for people who are not tech-savvy.
+### Dựng từ đầu
 
-## Target Users
+```bash
+cp .env.example .env
+make up
+make migrate
+make seed
+make test
+```
 
-- Pharmacy owners and small drugstore operators.
-- Staff who manage medicine inventory.
-- Individuals or families who want to keep track of the medicines they have at home.
+Reset môi trường **dev** (xóa volume named `medi_cine_pgdata`):
 
-## Main Features
+```bash
+make reset CONFIRM=yes
+```
 
-> The list below is the initial plan and will be updated as the project progresses.
+### Lệnh Makefile
 
-- **Medicine management:** add, edit, delete and view medicine details.
-- **Search and filter:** quickly look up by name, category, supplier or expiry date.
-- **Inventory management:** track incoming, outgoing and remaining quantities.
-- **Alerts:** remind users of medicines that are close to expiring or running low.
-- **Supplier management:** store information about where medicines are purchased.
-- **Accounts and roles:** log in and assign permissions by role (admin, staff).
-- **Reports and statistics:** summarize the medicine situation over time.
+| Lệnh | Việc |
+|---|---|
+| `make up` | Chạy Postgres 16, đợi healthcheck |
+| `make down` | Dừng container (giữ volume) |
+| `make migrate` | Chạy `sql/migrations/` theo thứ tự (idempotent) |
+| `make seed` | Nạp `sql/seed/` (idempotent) |
+| `make test` | Chạy `sql/tests/` + kiểm tra đủ 21 bảng |
+| `make psql` | Mở `psql` trong container |
+| `make reset CONFIRM=yes` | `down -v` → up → migrate → seed |
 
-## Team Members
+### Kết nối
 
-| No. | Full name | Student ID | Role |
-| --- | --- | --- | --- |
-| 1 | Vân Hoàng Nhật |  |  |
-| 2 | Trần Tấn Phát |  |  |
-| 3 | Lê Hoàng Nam |  |  |
-| 4 | Nguyễn Hoàng Nam |  |  |
-| 5 | Huỳnh Vĩnh An |  |  |
+| Từ đâu | Host | Port | DB / user |
+|---|---|---|---|
+| Máy host | `localhost` | `POSTGRES_PORT` (5432) | xem `.env` |
+| Container khác (cùng network) | `postgres` | `5432` | xem `.env` |
 
-## Project Plan
-
-| Phase | Description | Status |
-| --- | --- | --- |
-| 1 | Brainstorm ideas and define project scope | ☐ |
-| 2 | Requirements analysis and design | ☐ |
-| 3 | Build features | ☐ |
-| 4 | Testing and fixes | ☐ |
-| 5 | Finalization, report and presentation | ☐ |
-
-## Team Working Rules
-
-- Hold regular team meetings; every meeting has minutes recording discussions, decisions and task assignments.
-- Every task has a responsible person and a clear deadline.
-- Members report difficulties early so the whole team can help.
-
-## License
-
-This project is for educational purposes.
+Ví dụ URL host: `postgresql://medi_cine:medi_cine_dev_password@localhost:5432/medi_cine`
