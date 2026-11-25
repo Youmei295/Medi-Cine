@@ -1,0 +1,13 @@
+{
+  "_comment": "MOCK ONLY - test account for the prototype login screen. Not a real user, not a real password. Remove when the real Identity API is connected.",
+  "users": [
+    {
+      "id": "usr-demo-01",
+      "displayName": "Khách Demo",
+      "email": "khach.demo@medicine.test",
+      "role": "CUSTOMER",
+      "active": true,
+      "mockPassword": "demo1234"
+    }
+  ]
+}

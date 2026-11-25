@@ -1,0 +1,54 @@
+[
+  {
+    "id": "promo-001",
+    "version": 1,
+    "code": "CHAOTHANG11",
+    "name": "Giảm 10% tháng 11 (tối đa 30.000 ₫)",
+    "startsAt": "2026-11-01T00:00:00Z",
+    "endsAt": "2026-11-30T16:59:59Z",
+    "active": true,
+    "conditions": { "minimumSubtotal": 0, "movieIds": [], "showtimeIds": [], "seatTypes": [] },
+    "discountType": "PERCENTAGE",
+    "value": 1000,
+    "maxDiscount": 30000
+  },
+  {
+    "id": "promo-002",
+    "version": 1,
+    "code": "GIAM20K",
+    "name": "Giảm 20.000 ₫ cho đơn từ 150.000 ₫",
+    "startsAt": "2026-11-01T00:00:00Z",
+    "endsAt": "2026-12-31T16:59:59Z",
+    "active": true,
+    "conditions": { "minimumSubtotal": 150000, "movieIds": [], "showtimeIds": [], "seatTypes": [] },
+    "discountType": "FIXED_AMOUNT",
+    "value": 20000,
+    "maxDiscount": null
+  },
+  {
+    "id": "promo-003",
+    "version": 1,
+    "code": "VIPDEMNAY",
+    "name": "Giảm 15% ghế VIP (tối đa 50.000 ₫)",
+    "startsAt": "2026-11-01T00:00:00Z",
+    "endsAt": "2026-12-31T16:59:59Z",
+    "active": true,
+    "conditions": { "minimumSubtotal": 0, "movieIds": [], "showtimeIds": [], "seatTypes": ["VIP"] },
+    "discountType": "PERCENTAGE",
+    "value": 1500,
+    "maxDiscount": 50000
+  },
+  {
+    "id": "promo-004",
+    "version": 1,
+    "code": "HETHAN",
+    "name": "Mã đã hết hạn (dùng để thử lỗi)",
+    "startsAt": "2026-10-01T00:00:00Z",
+    "endsAt": "2026-10-31T16:59:59Z",
+    "active": true,
+    "conditions": { "minimumSubtotal": 0, "movieIds": [], "showtimeIds": [], "seatTypes": [] },
+    "discountType": "FIXED_AMOUNT",
+    "value": 10000,
+    "maxDiscount": null
+  }
+]
