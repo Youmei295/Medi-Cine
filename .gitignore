@@ -1,0 +1,54 @@
+# --- Secrets ---
+.env
+.env.*
+*.pem
+*.key
+# Re-include example env (must come after .env.*)
+!.env.example
+
+# --- Postgres local data / compose overrides ---
+pgdata/
+postgres-data/
+docker-compose.override.yml
+
+# --- Backups and dumps ---
+backups/
+*.dump
+*.backup
+*.sql.gz
+/dump*.sql
+/*_dump.sql
+
+# --- Large or real data ---
+data/
+*.csv
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- Node (frontend) ---
+node_modules/
+dist/
+build/
+
+# --- IDE and OS ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# File hướng dẫn cho AI, không đưa lên GitHub
+Agent.md
