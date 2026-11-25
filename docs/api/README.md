@@ -1,6 +1,6 @@
 # MEDI-CINE - TARGET API documentation
 
-This guide introduces the MEDI-CINE API for frontend and backend implementers. The four cinema PDFs provide the project requirements. The backend source directory currently contains a placeholder.
+This guide introduces the MEDI-CINE API for frontend and backend implementers. The four cinema PDFs provide the project requirements. The [Rust backend](../../backend/src/main.rs) exposes operational probes at `/health` and `/ready`. The cinema endpoints under `/api/v1` are planned. See the [repository README](../../README.md) for the project layout and backend status.
 
 ## How to use this documentation
 
@@ -11,7 +11,7 @@ This guide introduces the MEDI-CINE API for frontend and backend implementers. T
 
 Eighteen core use cases and two optional use cases map to the fourteen Vision capabilities. UC17 covers AI discovery, and UC20 covers PWA push notifications. Each optional feature has a fallback and can be disabled independently of booking, payment, and admission. Feature flags and administrative payment queries are supporting operations. The team selected VNPAY Sandbox. Project merchant access remains open.
 
-Static validation covers the OpenAPI specification, references, JSON Schema examples, unique operation IDs, source branches, forward and reverse traceability, document links, and SHA-256 hashes. NFR-01 through NFR-10 describe future acceptance checks for an implemented backend and UI. Their status is NOT RUN.
+Static validation covers the OpenAPI specification, references, JSON Schema examples, unique operation IDs, source branches, forward and reverse traceability, and document links. NFR-01 through NFR-10 remain NOT RUN. Run them once the relevant backend and UI workflows are implemented.
 
 ## Booking and check-in walkthrough
 

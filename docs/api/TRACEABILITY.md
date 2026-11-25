@@ -381,11 +381,11 @@ CLIENT-SELECT/FILTER/FORM/NAVIGATE/CAMERA/MANUAL-LOOKUP/CONFIRM/PERMISSION/SERVI
 
 Additional SC-X scenarios cover concurrency, retry keys, domain uniqueness, immutable snapshots, callback authentication, pending ticket issuance, concurrent admission, cross-owner access, cancellation, optional feature failures, WSS gaps, and crash recovery. DECISIONS.md records the approved rules and the remaining operational evidence.
 
-Vision §6 p9 and UCS §§1.3.4 p12, 2.3.1 p14, 5.3.2 p24, 12.3.1 p45, and 19.3.2 p63 define acceptance targets. Plan for at least 50 contenders, the stated catalogue, showtime, and admission timing targets, access-control tests, and fault injection. Static validation checks all 68 operation mappings, 20 basic sections, and 90 alternatives. Backend acceptance checks are NOT RUN.
+Vision §6 p9 and UCS §§1.3.4 p12, 2.3.1 p14, 5.3.2 p24, 12.3.1 p45, and 19.3.2 p63 define acceptance targets. Plan for at least 50 contenders, the stated catalogue, showtime, and admission timing targets, access-control tests, and fault injection. Static validation checks all 66 operation mappings, 20 basic sections, and 90 alternatives. Backend acceptance checks are NOT RUN.
 
 ## Planned non-functional acceptance checks
 
-Every check below is **NOT RUN: implementation/UI absent**. Environment proposals are test setup, not approved workload thresholds. Refer to CONTRACT_SCENARIOS planned execution; retain raw measurements/evidence with build, browser version, timezone, dataset and hardware before marking PASS. Nothing here changes hold TTL or creates a new feature.
+Every check below is **NOT RUN**. The cinema API and UI are pending. Use the proposed environments for test setup and confirm the workload before execution. Follow the [planned NFR execution](CONTRACT_SCENARIOS.md#planned-nfr-acceptance-execution) and retain raw evidence with the build, browser version, timezone, dataset, and hardware before marking PASS.
 
 | Acceptance ID / category | Exact source locator (repository-relative key) | Operations / client behavior | Measurable or inspectable pass condition | Proposed environment / evidence | Status |
 | --- | --- | --- | --- | --- | --- |
