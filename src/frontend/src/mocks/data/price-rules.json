@@ -1,0 +1,11 @@
+[
+  { "id": "pr-reg-wd", "version": 1, "seatType": "REGULAR", "category": "WEEKDAY", "amount": 75000, "currency": "VND" },
+  { "id": "pr-reg-we", "version": 1, "seatType": "REGULAR", "category": "WEEKEND", "amount": 90000, "currency": "VND" },
+  { "id": "pr-reg-ea", "version": 1, "seatType": "REGULAR", "category": "EARLY", "amount": 60000, "currency": "VND" },
+  { "id": "pr-vip-wd", "version": 1, "seatType": "VIP", "category": "WEEKDAY", "amount": 95000, "currency": "VND" },
+  { "id": "pr-vip-we", "version": 1, "seatType": "VIP", "category": "WEEKEND", "amount": 110000, "currency": "VND" },
+  { "id": "pr-vip-ea", "version": 1, "seatType": "VIP", "category": "EARLY", "amount": 80000, "currency": "VND" },
+  { "id": "pr-swb-wd", "version": 1, "seatType": "SWEETBOX", "category": "WEEKDAY", "amount": 180000, "currency": "VND" },
+  { "id": "pr-swb-we", "version": 1, "seatType": "SWEETBOX", "category": "WEEKEND", "amount": 210000, "currency": "VND" },
+  { "id": "pr-swb-ea", "version": 1, "seatType": "SWEETBOX", "category": "EARLY", "amount": 150000, "currency": "VND" }
+]
